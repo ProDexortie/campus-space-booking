@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бронирование пространств — Кампус Коворкинг</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="container header-container">
+      <div class="logo">
+        <span class="logo-badge">CAMPUS</span>
+        <span class="logo-title">Коворкинг & Переговорные</span>
+      </div>
+
+      <div id="auth-nav" class="auth-nav">
+        <!-- Renders dynamically: login/register buttons or user profile + logout -->
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <div id="alert-box" class="alert-box" style="display: none;"></div>
+
+    <nav class="tabs-nav">
+      <button class="tab-button active" data-tab="tab-spaces">Каталог мест</button>
+      <button class="tab-button" data-tab="tab-my-bookings" id="my-bookings-tab-btn" style="display: none;">Мои бронирования</button>
+      <button class="tab-button" data-tab="tab-admin" id="admin-tab-btn" style="display: none;">Управление (Админ)</button>
+    </nav>
+
+    <!-- TAB 1: SPACES -->
+    <section id="tab-spaces" class="tab-panel active">
+      <div class="filter-panel">
+        <div class="filter-group">
+          <label for="filter-type">Тип пространства:</label>
+          <select id="filter-type">
+            <option value="">Все типы</option>
+            <option value="desk">Рабочий стол</option>
+            <option value="meeting_room">Переговорная</option>
+            <option value="lounge_zone">Лаунж-зона</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-min-capacity">Мин. вместимость:</label>
+          <input type="number" id="filter-min-capacity" min="1" placeholder="1">
+        </div>
+
+        <div class="filter-checkboxes">
+          <label>
+            <input type="checkbox" id="filter-projector"> Проектор
+          </label>
+          <label>
+            <input type="checkbox" id="filter-whiteboard"> Доска
+          </label>
+        </div>
+
+        <div class="filter-actions">
+          <button id="apply-filters-btn" class="btn btn-secondary">Применить</button>
+          <button id="reset-filters-btn" class="btn btn-link">Сбросить</button>
+        </div>
+      </div>
+
+      <div id="spaces-loading" class="loading-indicator">Загрузка пространств...</div>
+      <div id="spaces-grid" class="spaces-grid"></div>
+    </section>
+
+    <!-- TAB 2: MY BOOKINGS -->
+    <section id="tab-my-bookings" class="tab-panel">
+      <div class="panel-header">
+        <h2>История моих бронирований</h2>
+        <button id="refresh-bookings-btn" class="btn btn-secondary btn-sm">Обновить</button>
+      </div>
+
+      <div id="bookings-loading" class="loading-indicator">Загрузка бронирований...</div>
+      <div id="bookings-list" class="bookings-list"></div>
+    </section>
+
+    <!-- TAB 3: ADMIN PANEL -->
+    <section id="tab-admin" class="tab-panel">
+      <div class="panel-header">
+        <h2>Добавить новое пространство</h2>
+      </div>
+
+      <form id="create-space-form" class="card form-card">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="space-title">Название пространства *</label>
+            <input type="text" id="space-title" required placeholder="Например: Переговорная 'Восток'">
+          </div>
+
+          <div class="form-group">
+            <label for="space-type">Тип</label>
+            <select id="space-type">
+              <option value="desk">Рабочий стол</option>
+              <option value="meeting_room">Переговорная</option>
+              <option value="lounge_zone">Лаунж-зона</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="space-capacity">Вместимость (чел.) *</label>
+            <input type="number" id="space-capacity" value="1" min="1" max="500" required>
+          </div>
+
+          <div class="form-group">
+            <label>Оборудование</label>
+            <div class="checkbox-row">
+              <label><input type="checkbox" id="space-projector"> Проектор</label>
+              <label><input type="checkbox" id="space-whiteboard"> Маркерная доска</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="space-description">Описание</label>
+          <textarea id="space-description" rows="3" placeholder="Особенности, расположение, розетки..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Создать пространство</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- MODAL: LOGIN -->
+  <div id="modal-login" class="modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Вход в систему</h3>
+        <button class="modal-close" data-close="modal-login">&times;</button>
+      </div>
+      <form id="login-form" class="modal-body">
+        <div class="form-group">
+          <label for="login-email">Электронная почта</label>
+          <input type="email" id="login-email" required placeholder="name@campus.edu">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Пароль</label>
+          <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-login">Отмена</button>
+          <button type="submit" class="btn btn-primary">Войти</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTER -->
+  <div id="modal-register" class="modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Регистрация</h3>
+        <button class="modal-close" data-close="modal-register">&times;</button>
+      </div>
+      <form id="register-form" class="modal-body">
+        <div class="form-group">
+          <label for="reg-fullname">Имя и фамилия *</label>
+          <input type="text" id="reg-fullname" required placeholder="Иван Иванов">
+        </div>
+        <div class="form-group">
+          <label for="reg-email">Электронная почта *</label>
+          <input type="email" id="reg-email" required placeholder="ivan@campus.edu">
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Пароль (от 6 символов) *</label>
+          <input type="password" id="reg-password" minlength="6" required placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <label for="reg-role">Роль</label>
+          <select id="reg-role">
+            <option value="student">Студент</option>
+            <option value="admin">Администратор</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-register">Отмена</button>
+          <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: BOOKING -->
+  <div id="modal-booking" class="modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="booking-modal-title">Бронирование</h3>
+        <button class="modal-close" data-close="modal-booking">&times;</button>
+      </div>
+      <form id="booking-form" class="modal-body">
+        <input type="hidden" id="booking-space-id">
+        <p id="booking-space-info" class="text-muted"></p>
+
+        <div class="form-group">
+          <label for="booking-start">Начало бронирования *</label>
+          <input type="datetime-local" id="booking-start" required>
+        </div>
+
+        <div class="form-group">
+          <label for="booking-end">Окончание бронирования *</label>
+          <input type="datetime-local" id="booking-end" required>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-booking">Отмена</button>
+          <button type="submit" class="btn btn-primary">Подтвердить бронь</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
