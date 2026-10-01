@@ -36,7 +36,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: campus_app
-    restart: unless-stopped
+    restart: on-failure:5
     command: >
       sh -c "alembic upgrade head &&
              uvicorn src.main:app --host 0.0.0.0 --port 8000"
@@ -61,7 +61,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: campus_celery_worker
-    restart: unless-stopped
+    restart: on-failure:5
     command: celery -A src.tasks.celery_app worker -l info
     environment:
       - SECRET_KEY=${SECRET_KEY:-production-random-secret-key-32-chars-long}
@@ -80,8 +80,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: campus_celery_beat
-    restart: unless-stopped
-    command: celery -A src.tasks.celery_app beat -l info
+    restart: on-failure:5
+    command: celery -A src.tasks.celery_app beat -l info -s /tmp/celerybeat-schedule
     environment:
       - SECRET_KEY=${SECRET_KEY:-production-random-secret-key-32-chars-long}
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-campus_booking}

@@ -31,11 +31,15 @@ RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
 
 # Create and switch to non-root user
 RUN addgroup --system --gid 1001 appgroup && \
-    adduser --system --uid 1001 --gid 1001 appuser
+    adduser --system --uid 1001 --gid 1001 appuser && \
+    chown -R appuser:appgroup /app
 
 COPY --chown=appuser:appgroup alembic.ini .
 COPY --chown=appuser:appgroup alembic/ alembic/
 COPY --chown=appuser:appgroup src/ src/
+
+# Sanity check: ensure modules can be imported without syntax or type errors
+RUN python -c "import src.main, src.tasks.celery_app, src.tasks.notification_tasks"
 
 USER appuser
 

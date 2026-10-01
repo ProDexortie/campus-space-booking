@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 from datetime import UTC, datetime
-from typing import Any
 
 from celery import Task
 from sqlalchemy import update
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 @celery_app.task(name="src.tasks.notification_tasks.send_booking_confirmation", bind=True, max_retries=3)
 def send_booking_confirmation(
-    self: Task[Any, Any],
+    self: Task,
     booking_id: int,
     user_email: str,
     space_title: str,
